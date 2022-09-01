@@ -14,6 +14,8 @@ Please implement the requiered methods.
 from HashScheme import HashScheme
 import hashlib
 
+from consistent_hash.Store import Node
+
 class ModHash(HashScheme):
 
     def __init__(self):
@@ -21,16 +23,24 @@ class ModHash(HashScheme):
         You have to decide what members to add to the class
         """
         self.__scheme_name = 'Modular_Hash'
-        pass
+        self.nodes = {}
+        self.count = 0
 
     def get_name(self):
         return self.__scheme_name
+
+    def __get_hash(self, value):
+        """
+        Calculates an initial hash using md5.
+        """
+        return int(hashlib.md5(value.encode()).hexdigest(),16) % self.node.length
 
     def dump(self):
         """
         Auxiliary method to print out information about the hash
         """
-        pass
+        for k in self.nodes.keys():
+            print ("Node: {0} hash: {1}".format(self.nodes[k], k))
 
     def add_node(self, new_node):
         """
@@ -38,7 +48,10 @@ class ModHash(HashScheme):
         need to update Store to react in certain way depending on the
         scheme_name.
         """
-        pass
+        self.nodes[self.count] = new_node
+        self.count = self.count + 1
+        return 0
+        
 
     def remove_node(self, node):
         """
@@ -46,10 +59,19 @@ class ModHash(HashScheme):
         need to update Store to react in certain way depending on the
         scheme_name.
         """
-        pass
+        self.count = self.count - 1
+        hash_value = self.__get_hash(node)
+        if hash_value in self.nodes.keys():
+            del self.nodes[hash_value]
+            return 0
+        return 1
+        
 
     def hash(self, value):
         """
         Convert value to a number representation and then obtain mod(number_of_nodes)
         """
-        pass
+        if self.count == 0:
+            return self.nodes[0]
+        else:
+            return value % self.nodes.length
