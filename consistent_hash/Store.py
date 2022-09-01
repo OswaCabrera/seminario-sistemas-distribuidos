@@ -49,50 +49,74 @@ class Store:
                 print('    - {0}'.format(resource))
 
     def add_node(self, new_node):
-        """
-        Creates a new node in the datastore. Once the node is created, a number
-        of resources have to be migrated to conform to the hash schema.
-
-        Important: Notice that this method is designed to work with a
-        consistent hash. You may need to adjust it to make it work with modular
-        hash. Hash_generator has a member "scheme_name" that you can use.
-        """
-        prev_node = self.hash_generator.hash(new_node)
-
-        rc = self.hash_generator.add_node(new_node)
-        if rc == 0:
-            self.nodes[new_node] = Node(new_node)
-
+        
+        if self.hash_generator.scheme_name == "Consistent_Hash":
             """
-            If there is a node in the counter clockwise direction, then the
-            resources stored in that node need to be rebalanced (removed from a
-            node and added to another one).
+            Creates a new node in the datastore. Once the node is created, a number
+            of resources have to be migrated to conform to the hash schema.
+
+            Important: Notice that this method is designed to work with a
+            consistent hash. You may need to adjust it to make it work with modular
+            hash. Hash_generator has a member "scheme_name" that you can use.
             """
-            if prev_node is not None:
-                resources = self.nodes[prev_node].resources.copy()
+            prev_node = self.hash_generator.hash(new_node)
 
-                for element in resources:
-                    target_node = self.hash_generator.hash(element)
+            rc = self.hash_generator.add_node(new_node)
+            if rc == 0:
+                self.nodes[new_node] = Node(new_node)
 
-                    if target_node is not None and target_node != prev_node:
-                        self.nodes[prev_node].resources.remove(element)
-                        self.nodes[target_node].resources.append(element)
+                """
+                If there is a node in the counter clockwise direction, then the
+                resources stored in that node need to be rebalanced (removed from a
+                node and added to another one).
+                """
+                if prev_node is not None:
+                    resources = self.nodes[prev_node].resources.copy()
+
+                    for element in resources:
+                        target_node = self.hash_generator.hash(element)
+
+                        if target_node is not None and target_node != prev_node:
+                            self.nodes[prev_node].resources.remove(element)
+                            self.nodes[target_node].resources.append(element)
+        else:
+            rc = self.hash_generator.add_node(new_node)
+            
+            if rc == 0:
+                self.nodes[self.hash_generator.count] = Node(new_node)
+
+
+
 
     def remove_node(self, node):
-        """
-        Removes a node from the datastore. When a node is removed, a number
-        of resources (that were stored in that node) have to be migrated to
-        conform to the hash schema.
+        if self.hash_generator.scheme_name == "Consistent_Hash":
+            """
+            Removes a node from the datastore. When a node is removed, a number
+            of resources (that were stored in that node) have to be migrated to
+            conform to the hash schema.
 
-        Important: Notice that this method is designed to work with a
-        consistent hash. You may need to adjust it to make it work with modular
-        hash. Hash_generator has a member "scheme_name" that you can use.
-        """
-        rc = self.hash_generator.remove_node(node)
-        if rc == 0:
-            for element in self.nodes[node].resources:
-                self.add_resource(element)
-            del self.nodes[node]
+            Important: Notice that this method is designed to work with a
+            consistent hash. You may need to adjust it to make it work with modular
+            hash. Hash_generator has a member "scheme_name" that you can use.
+            """
+            rc = self.hash_generator.remove_node(node)
+            if rc == 0:
+                for element in self.nodes[node].resources:
+                    self.add_resource(element)
+                del self.nodes[node]
+            else:
+                rc = self.hash_generator.remove(node)
+        else:
+            rc = self.hash_generator.remove_node(node)
+            if rc == 0:
+                respaldo = []
+                for element in self.nodes.length:
+                    respaldo.apend(element.resources)
+                del self.nodes[node]
+                for element in respaldo:
+                    self.add_resource(element.resources)
+
+            
 
     def add_resource(self, res):
         """
