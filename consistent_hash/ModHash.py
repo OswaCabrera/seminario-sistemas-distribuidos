@@ -33,7 +33,7 @@ class ModHash(HashScheme):
         """
         Calculates an initial hash using md5.
         """
-        return int(hashlib.md5(value.encode()).hexdigest(),16) % self.node.length
+        return int(hashlib.md5(value.encode()).hexdigest(),16) % 1000
 
     def dump(self):
         """
@@ -59,10 +59,9 @@ class ModHash(HashScheme):
         need to update Store to react in certain way depending on the
         scheme_name.
         """
-        self.count = self.count - 1
-        hash_value = self.__get_hash(node)
-        if hash_value in self.nodes.keys():
-            del self.nodes[hash_value]
+        if self.nodes != 0:
+            del self.nodes[self.count]
+            self.count = self.count - 1
             return 0
         return 1
         
@@ -71,7 +70,8 @@ class ModHash(HashScheme):
         """
         Convert value to a number representation and then obtain mod(number_of_nodes)
         """
-        if self.count == 0:
-            return self.nodes[0]
-        else:
-            return value % self.nodes.length
+
+        hash_value = self.__get_hash(value)
+
+        return self.nodes[hash_value%self.count]
+
