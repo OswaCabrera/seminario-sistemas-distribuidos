@@ -34,6 +34,7 @@ class Store:
     def __init__(self, hash_generator):
         self.nodes = {}
         self.hash_generator = hash_generator
+        self.count = 0
 
     def dump(self):
         """
@@ -50,7 +51,7 @@ class Store:
 
     def add_node(self, new_node):
         
-        if self.hash_generator.scheme_name == "Consistent_Hash":
+        if self.hash_generator.scheme_name == 'Consistent_Hash':
             """
             Creates a new node in the datastore. Once the node is created, a number
             of resources have to be migrated to conform to the hash schema.
@@ -83,7 +84,15 @@ class Store:
             rc = self.hash_generator.add_node(new_node)
             
             if rc == 0:
-                self.nodes[self.hash_generator.count] = Node(new_node)
+                self.count = self.count + 1
+                self.nodes[new_node] = Node(new_node)
+                respaldo = []
+                for element in self.nodes.length:
+                    respaldo.apend(element.resources)
+                del self.nodes[self.count]
+                for element in respaldo:
+                    self.add_resource(element.resources)
+
 
 
 
@@ -109,6 +118,7 @@ class Store:
         else:
             rc = self.hash_generator.remove_node(node)
             if rc == 0:
+                self.count = self.count - 1
                 respaldo = []
                 for element in self.nodes.length:
                     respaldo.apend(element.resources)
